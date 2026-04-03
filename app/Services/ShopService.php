@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Repositories\UserRepository;
 use App\Repositories\ShopRepository;
 use CodeIgniter\HTTP\Files\UploadedFile;
 
@@ -24,6 +25,7 @@ class ShopService
 
     public function __construct(
         private readonly ShopRepository $shop = new ShopRepository(),
+        private readonly UserRepository $users = new UserRepository(),
         private readonly AuditService $audit = new AuditService()
     ) {
     }
@@ -245,14 +247,14 @@ class ShopService
             'actor_user_id' => $actorUserId,
             'movement_type' => 'checkout',
             'quantity' => $movement['quantity'],
-            'notes' => $movement['notes'],
+            'notes' => $this->checkoutLabelForUser($actorUserId),
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
         $this->audit->log($actorUserId, 'checkout', 'shop_item', $itemId, [
             'movement_id' => $movementId,
             'quantity' => $movement['quantity'],
-            'notes' => $movement['notes'],
+            'notes' => $this->checkoutLabelForUser($actorUserId),
             'remaining_quantity' => $newQty,
         ]);
     }
@@ -278,14 +280,14 @@ class ShopService
             'actor_user_id' => $actorUserId,
             'movement_type' => 'checkin',
             'quantity' => $movement['quantity'],
-            'notes' => $movement['notes'],
+            'notes' => $this->checkinLabelForUser($actorUserId),
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
         $this->audit->log($actorUserId, 'checkin', 'shop_item', $itemId, [
             'movement_id' => $movementId,
             'quantity' => $movement['quantity'],
-            'notes' => $movement['notes'],
+            'notes' => $this->checkinLabelForUser($actorUserId),
             'new_quantity' => $newQty,
         ]);
     }
@@ -398,6 +400,36 @@ class ShopService
         ];
     }
 
+    public function checkoutLabelForUser(int $actorUserId): string
+    {
+        $user = $this->users->findById($actorUserId);
+        if ($user === null) {
+            return 'Utsjekket av ukjent bruker';
+        }
+
+        $name = trim((string) (($user->first_name ?? '') . ' ' . ($user->last_name ?? '')));
+        if ($name === '') {
+            $name = trim((string) ($user->name ?? ''));
+        }
+
+        return $name !== '' ? 'Utsjekket av ' . $name : 'Utsjekket av bruker #' . $actorUserId;
+    }
+
+    public function checkinLabelForUser(int $actorUserId): string
+    {
+        $user = $this->users->findById($actorUserId);
+        if ($user === null) {
+            return 'Innsjekket av ukjent bruker';
+        }
+
+        $name = trim((string) (($user->first_name ?? '') . ' ' . ($user->last_name ?? '')));
+        if ($name === '') {
+            $name = trim((string) ($user->name ?? ''));
+        }
+
+        return $name !== '' ? 'Innsjekket av ' . $name : 'Innsjekket av bruker #' . $actorUserId;
+    }
+
     private function parseImportFile(UploadedFile $file): array
     {
         $extension = strtolower((string) $file->getClientExtension());
@@ -424,7 +456,7 @@ class ShopService
         $sharedStrings = [];
         $sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml');
         if (is_string($sharedStringsXml) && $sharedStringsXml !== '') {
-            $xml = simplexml_load_string($sharedStringsXml);
+            $xml = simplexml_load_string($this->stripXmlNamespaces($sharedStringsXml));
             if ($xml !== false) {
                 foreach ($xml->si as $item) {
                     $text = '';
@@ -447,7 +479,7 @@ class ShopService
             throw new \InvalidArgumentException('Fant ikke første ark i XLSX-filen.');
         }
 
-        $xml = simplexml_load_string($sheetXml);
+        $xml = simplexml_load_string($this->stripXmlNamespaces($sheetXml));
         if ($xml === false) {
             throw new \InvalidArgumentException('Kunne ikke lese innholdet i XLSX-filen.');
         }
@@ -459,7 +491,19 @@ class ShopService
                 $reference = (string) ($cell['r'] ?? '');
                 $column = preg_replace('/\d+/', '', $reference) ?? '';
                 $type = (string) ($cell['t'] ?? '');
-                $value = (string) ($cell->v ?? '');
+                $value = '';
+
+                if ($type === 'inlineStr') {
+                    if (isset($cell->is->t)) {
+                        $value = (string) $cell->is->t;
+                    } else {
+                        foreach (($cell->is->r ?? []) as $run) {
+                            $value .= (string) ($run->t ?? '');
+                        }
+                    }
+                } else {
+                    $value = (string) ($cell->v ?? '');
+                }
 
                 if ($type === 's') {
                     $value = $sharedStrings[(int) $value] ?? '';
@@ -652,6 +696,11 @@ class ShopService
         }
 
         return $letters;
+    }
+
+    private function stripXmlNamespaces(string $xml): string
+    {
+        return preg_replace('/\sxmlns(:\w+)?="[^"]*"/i', '', $xml) ?? $xml;
     }
 
     private function pruneOldDiscontinuedItems(): void
