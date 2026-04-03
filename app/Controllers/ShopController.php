@@ -94,6 +94,26 @@ class ShopController extends BaseController
         }
     }
 
+    public function importExcel()
+    {
+        try {
+            $summary = $this->shop->importExcel(
+                $this->request->getFile('inventory_file'),
+                (int) $this->session->get('user_id')
+            );
+
+            return redirect()->to('/shop')->with('message', sprintf(
+                'Import fullført. %d nye varer, %d innsjekker, %d utsjekker, %d uendrede.',
+                $summary['created'],
+                $summary['checked_in'],
+                $summary['checked_out'],
+                $summary['unchanged']
+            ));
+        } catch (\Throwable $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
     public function checkOut(int $itemId)
     {
         try {
@@ -148,7 +168,7 @@ class ShopController extends BaseController
         $chunks = array_chunk($lines, $linesPerPage);
         $objects = [];
 
-        $objects[] = '<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>';
+        $objects[] = '<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>';
 
         $pageIds = [];
         $contentIds = [];

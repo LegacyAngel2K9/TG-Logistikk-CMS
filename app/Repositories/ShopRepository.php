@@ -60,6 +60,21 @@ class ShopRepository
         return $this->items->find($id);
     }
 
+    public function findItemBySignature(int $categoryId, string $name, ?string $size): ?object
+    {
+        $builder = $this->items
+            ->where('category_id', $categoryId)
+            ->where('name', $name);
+
+        if ($size === null) {
+            $builder->where('size', null);
+        } else {
+            $builder->where('size', $size);
+        }
+
+        return $builder->first();
+    }
+
     public function createItem(array $data): int
     {
         $this->items->insert($data);

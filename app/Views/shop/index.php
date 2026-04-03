@@ -52,7 +52,13 @@
     <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem;">
         <a href="/shop/export/pdf" class="btn btn-outline-light">Last ned PDF</a>
         <a href="/shop/export/excel" class="btn btn-outline-light">Last ned Excel</a>
+        <form method="post" action="/shop/import/excel" enctype="multipart/form-data" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:0;">
+            <?= csrf_field() ?>
+            <input type="file" name="inventory_file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" required style="width:auto;min-width:240px;margin:0;">
+            <button type="submit" class="btn btn-outline-light" style="margin:0;">Import Excel</button>
+        </form>
     </div>
+    <p style="margin:-.35rem 0 1rem;color:#94a3b8;">Importer varetelling fra Excel. Systemet justerer lageret med innsjekk og utsjekk pÃ¥ brukeren som importerer.</p>
     <table>
         <tr>
             <th>ID</th>

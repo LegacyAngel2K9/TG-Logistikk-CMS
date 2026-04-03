@@ -29,6 +29,7 @@ $routes->group('', ['filter' => 'auth'], static function (RouteCollection $route
         $routes->get('/', 'ShopController::index');
         $routes->get('export/excel', 'ShopController::exportExcel');
         $routes->get('export/pdf', 'ShopController::exportPdf');
+        $routes->post('import/excel', 'ShopController::importExcel');
         $routes->post('categories/create', 'ShopController::createCategory');
         $routes->post('items/create', 'ShopController::createItem');
         $routes->post('checkout/(:num)', 'ShopController::checkOut/$1');
