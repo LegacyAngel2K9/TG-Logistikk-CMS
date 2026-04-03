@@ -203,6 +203,7 @@ class AdminService
     {
         $current = $this->settings->get();
         $data = [
+            'app_name' => $this->nullableTrimmedValue($input['app_name'] ?? null, 180) ?? 'Bifrost',
             'enable_local_login' => isset($input['enable_local_login']) ? 1 : 0,
             'enable_keycloak_login' => isset($input['enable_keycloak_login']) ? 1 : 0,
             'logo_url' => $this->nullableTrimmedValue($input['logo_url'] ?? null, 255),
@@ -213,6 +214,7 @@ class AdminService
             'smtp_user' => $this->nullableTrimmedValue($input['smtp_user'] ?? null, 180),
             'smtp_crypto' => $this->normalizeSmtpCrypto((string) ($input['smtp_crypto'] ?? 'tls')),
             'osrm_base_url' => $this->nullableTrimmedValue($input['osrm_base_url'] ?? null, 255),
+            'favicon_url' => $this->nullableTrimmedValue($input['favicon_url'] ?? null, 255),
             'vegvesen_api_key' => $this->nullableTrimmedValue($input['vegvesen_api_key'] ?? null, 255),
             'keycloak_base_url' => $this->nullableTrimmedValue($input['keycloak_base_url'] ?? null, 255),
             'keycloak_realm' => $this->nullableTrimmedValue($input['keycloak_realm'] ?? null, 180),

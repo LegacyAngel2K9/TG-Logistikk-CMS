@@ -4,8 +4,22 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
-    <title><?= esc($title ?? 'TG Logistics CMS') ?></title>
-    <link rel="icon" type="image/x-icon" href="<?= base_url('admintemplate/src/assets/img/favicon.ico') ?>"/>
+    <?php
+    $baseSettingsRepository = new \App\Repositories\SettingsRepository();
+    $baseSettings = $baseSettingsRepository->get();
+    $baseAppName = trim((string) ($baseSettings->app_name ?? ''));
+    if ($baseAppName === '') {
+        $baseAppName = 'Bifrost';
+    }
+    ?>
+    <title><?= esc($title ?? $baseAppName) ?></title>
+    <?php
+    $baseFaviconUrl = trim((string) ($baseSettings->favicon_url ?? ''));
+    if ($baseFaviconUrl === '') {
+        $baseFaviconUrl = base_url('admintemplate/src/assets/img/favicon.ico');
+    }
+    ?>
+    <link rel="icon" type="image/x-icon" href="<?= esc($baseFaviconUrl) ?>"/>
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700" rel="stylesheet">
 
     <link href="<?= base_url('admintemplate/src/bootstrap/css/bootstrap.min.css') ?>" rel="stylesheet" type="text/css"/>
@@ -788,8 +802,9 @@
     }
 
     $appLogoUrl = trim((string) ($appSettings->logo_url ?? ''));
-    if ($appLogoUrl === '') {
-        $appLogoUrl = 'https://www.tg.no/tg26/tg26_horizontal.svg';
+    $appName = trim((string) ($appSettings->app_name ?? ''));
+    if ($appName === '') {
+        $appName = 'Bifrost';
     }
     $path = trim(service('uri')->getPath(), '/');
     $path = $path === '' ? 'dashboard' : $path;
@@ -810,7 +825,7 @@
         </button>
         <a href="<?= base_url('dashboard') ?>" class="navbar-brand d-flex align-items-center gap-2">
             <img src="<?= esc($appLogoUrl) ?>" class="navbar-logo" alt="TG logo" style="height:28px;">
-            <span class="text-white fw-bold">TG Logistics</span>
+            <span class="text-white fw-bold"><?= esc($appName) ?></span>
         </a>
         <ul class="navbar-item flex-row ms-lg-auto ms-0">
             <li class="nav-item notification-item" data-role="notification-menu" data-fetch-url="<?= esc(base_url('feedback/notifications')) ?>" data-read-url="<?= esc(base_url('feedback/notifications/read')) ?>" data-csrf-name="<?= esc(csrf_token()) ?>" data-csrf-hash="<?= esc(csrf_hash()) ?>">
