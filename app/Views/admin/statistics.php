@@ -145,7 +145,7 @@ $warehouseStats = $warehouseStats ?? [];
     <article class="stats-tile">
         <p class="stats-tile__label">Forespørsler</p>
         <p class="stats-tile__value"><?= esc((string) ($requestStats['total'] ?? 0)) ?></p>
-        <div class="stats-tile__meta">Innmeldt: <?= esc((string) ($requestStats['pending'] ?? 0)) ?> | Levert: <?= esc((string) ($requestStats['fulfilled'] ?? 0)) ?></div>
+        <div class="stats-tile__meta">Totalt antall registrerte forespørsler</div>
     </article>
 </div>
 
