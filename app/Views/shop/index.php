@@ -60,6 +60,7 @@
             <th>Kategori</th>
             <th>Størrelse</th>
             <th>Antall</th>
+            <th>Status</th>
             <th>Notater</th>
             <th>Utsjekk</th>
             <th>Innsjekk</th>
@@ -72,6 +73,13 @@
                 <td><?= esc((string) $item->category_name) ?></td>
                 <td><?= esc((string) ($item->size ?: '-')) ?></td>
                 <td><strong><?= esc((string) $item->quantity) ?></strong></td>
+                <td>
+                    <?php if ((string) ($item->status ?? 'active') === 'discontinued'): ?>
+                        <span class="badge rejected">Utgaar</span>
+                    <?php else: ?>
+                        <span class="badge active">Aktiv</span>
+                    <?php endif; ?>
+                </td>
                 <td><?= esc((string) ($item->notes ?: '-')) ?></td>
                 <td>
                     <form method="post" action="/shop/checkout/<?= esc((string) $item->id) ?>">

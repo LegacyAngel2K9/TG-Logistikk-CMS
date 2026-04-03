@@ -345,7 +345,7 @@ class AdminService
     {
         $db = Database::connect();
         $roleTable = $db->table('roles');
-        $defaults = ['developer', 'chief', 'co-chief', 'transport_ansvarlig', 'skiftleder', 'sambandsansvarlig', 'logistikk', 'bruker'];
+        $defaults = ['developer', 'chief', 'co-chief', 'transport_ansvarlig', 'skiftleder', 'sambandsansvarlig', 'logistikk', 'shop', 'innkjop', 'bruker'];
 
         foreach ($defaults as $name) {
             $exists = $roleTable->where('name', $name)->get()->getFirstRow();

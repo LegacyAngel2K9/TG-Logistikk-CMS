@@ -29,6 +29,8 @@ class ShopService
 
     public function data(): array
     {
+        $this->pruneOldDiscontinuedItems();
+
         return [
             'items' => $this->shop->itemsWithCategory(),
             'categories' => $this->shop->categories(),
@@ -65,6 +67,8 @@ class ShopService
         $data = $this->validateItem($input, $actorUserId, true);
         $itemId = $this->shop->createItem([
             ...$data,
+            'status' => $data['quantity'] > 0 ? 'active' : 'discontinued',
+            'discontinued_at' => $data['quantity'] > 0 ? null : date('Y-m-d H:i:s'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
@@ -101,6 +105,8 @@ class ShopService
         $newQty = $currentQty - $movement['quantity'];
         $this->shop->updateItemById($itemId, [
             'quantity' => $newQty,
+            'status' => $newQty > 0 ? 'active' : 'discontinued',
+            'discontinued_at' => $newQty > 0 ? null : date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
@@ -132,6 +138,8 @@ class ShopService
         $newQty = max(0, (int) $item->quantity) + $movement['quantity'];
         $this->shop->updateItemById($itemId, [
             'quantity' => $newQty,
+            'status' => $newQty > 0 ? 'active' : 'discontinued',
+            'discontinued_at' => $newQty > 0 ? null : ((string) ($item->discontinued_at ?? '') !== '' ? $item->discontinued_at : date('Y-m-d H:i:s')),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
@@ -258,5 +266,24 @@ class ShopService
             'quantity' => (int) $input['quantity'],
             'notes' => ! empty($input['notes']) ? mb_substr(trim(strip_tags((string) $input['notes'])), 0, 255) : null,
         ];
+    }
+
+    private function pruneOldDiscontinuedItems(): void
+    {
+        $cutoff = date('Y-m-d H:i:s', strtotime('-1 year'));
+        $items = $this->shop->oldDiscontinuedItems($cutoff);
+
+        foreach ($items as $item) {
+            $itemId = (int) ($item->id ?? 0);
+            if ($itemId < 1) {
+                continue;
+            }
+
+            if ($this->shop->countMovementsForItem($itemId) > 0) {
+                $this->shop->deleteMovementsForItem($itemId);
+            }
+
+            $this->shop->deleteItemById($itemId);
+        }
     }
 }

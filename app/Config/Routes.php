@@ -25,7 +25,7 @@ $routes->group('auth', static function (RouteCollection $routes): void {
 $routes->group('', ['filter' => 'auth'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'DashboardController::index');
 
-    $routes->group('shop', ['filter' => 'role:developer,chief,co-chief,logistikk'], static function (RouteCollection $routes): void {
+    $routes->group('shop', ['filter' => 'role:developer,chief,co-chief,logistikk,shop'], static function (RouteCollection $routes): void {
         $routes->get('/', 'ShopController::index');
         $routes->get('export/excel', 'ShopController::exportExcel');
         $routes->get('export/pdf', 'ShopController::exportPdf');
@@ -118,7 +118,7 @@ $routes->group('', ['filter' => 'auth'], static function (RouteCollection $route
         $routes->post('return/(:num)', 'CommsController::returnLoan/$1');
     });
 
-    $routes->group('transport', static function (RouteCollection $routes): void {
+    $routes->group('transport', ['filter' => 'role:developer,chief,co-chief,logistikk,innkjop'], static function (RouteCollection $routes): void {
         $routes->get('/', 'TransportController::index');
         $routes->get('inspect/(:num)', 'TransportController::inspect/$1');
         $routes->post('request-people', 'TransportController::requestPeople');

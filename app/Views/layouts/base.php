@@ -872,7 +872,7 @@
                 <li class="menu <?= $segment === 'dashboard' ? 'active' : '' ?>">
                     <a href="<?= base_url('dashboard') ?>"><i class="fa-solid fa-gauge-high me-2"></i><span class="nav-text">Dashbord</span></a>
                 </li>
-                <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk'])): ?>
+                <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk', 'bruker'])): ?>
                     <li class="menu-group <?= in_array($segment, $assetSegments, true) ? 'is-open' : '' ?>" data-menu-group>
                         <button type="button" class="menu-group__toggle" data-menu-group-toggle aria-expanded="<?= in_array($segment, $assetSegments, true) ? 'true' : 'false' ?>">
                             <span><i class="fa-solid fa-boxes-stacked me-2"></i>Utstyr og utlån</span>
@@ -891,17 +891,19 @@
                         </ul>
                     </li>
                 <?php endif; ?>
-                <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk', 'sambandsansvarlig'])): ?>
+                <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk', 'shop', 'innkjop', 'sambandsansvarlig'])): ?>
                     <li class="menu-group <?= in_array($segment, $operationsSegments, true) ? 'is-open' : '' ?>" data-menu-group>
                         <button type="button" class="menu-group__toggle" data-menu-group-toggle aria-expanded="<?= in_array($segment, $operationsSegments, true) ? 'true' : 'false' ?>">
                             <span><i class="fa-solid fa-truck-ramp-box me-2"></i>Drift og logistikk</span>
                             <i class="fa-solid fa-chevron-down menu-group__toggle-icon"></i>
                         </button>
                         <ul class="list-unstyled menu-group__items">
-                            <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk'])): ?>
+                            <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk', 'shop'])): ?>
                                 <li class="menu <?= $segment === 'shop' ? 'active' : '' ?>">
                                     <a href="<?= base_url('shop') ?>"><i class="fa-solid fa-store me-2"></i><span class="nav-text">Shop</span></a>
                                 </li>
+                            <?php endif; ?>
+                            <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk'])): ?>
                                 <li class="menu <?= $segment === 'warehouse' ? 'active' : '' ?>">
                                     <a href="<?= base_url('warehouse') ?>"><i class="fa-solid fa-warehouse me-2"></i><span class="nav-text">Lager</span></a>
                                 </li>
@@ -929,19 +931,21 @@
                         </ul>
                     </li>
                 <?php endif; ?>
-                <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk'])): ?>
+                <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk', 'shop'])): ?>
                     <li class="menu-group <?= in_array($segment, $toolsSegments, true) ? 'is-open' : '' ?>" data-menu-group>
                         <button type="button" class="menu-group__toggle" data-menu-group-toggle aria-expanded="<?= in_array($segment, $toolsSegments, true) ? 'true' : 'false' ?>">
                             <span><i class="fa-solid fa-screwdriver-wrench me-2"></i>Verktøy</span>
                             <i class="fa-solid fa-chevron-down menu-group__toggle-icon"></i>
                         </button>
                         <ul class="list-unstyled menu-group__items">
+                            <?php if (hasRole(['developer', 'chief', 'co-chief', 'logistikk'])): ?>
                             <li class="menu <?= $segment === 'strekkoder' ? 'active' : '' ?>">
                                 <a href="<?= base_url('strekkoder') ?>"><i class="fa-solid fa-barcode me-2"></i><span class="nav-text">Strekkoder</span></a>
                             </li>
                             <li class="menu <?= $segment === 'privat-utstyr' ? 'active' : '' ?>">
                                 <a href="<?= base_url('privat-utstyr') ?>"><i class="fa-solid fa-user-lock me-2"></i><span class="nav-text">Privat Utstyr</span></a>
                             </li>
+                            <?php endif; ?>
                             <?php if (! hasRole('ingen_tilbakemeldinger')): ?>
                             <li class="menu <?= $segment === 'feedback' ? 'active' : '' ?>">
                                 <a href="<?= base_url('feedback') ?>"><i class="fa-solid fa-bug me-2"></i><span class="nav-text">Tilbakemeldinger</span></a>
