@@ -771,12 +771,22 @@
 <?php if (session()->get('user_id')): ?>
 <?php
     $settingsRepository = new \App\Repositories\SettingsRepository();
-    $feedbackService = new \App\Services\FeedbackService();
     $appSettings = $settingsRepository->get();
     $feedbackBlocked = hasRole('ingen_tilbakemeldinger');
-    $notificationPayload = $feedbackService->notificationPayload((int) session('user_id'));
-    $feedbackAnnouncements = (array) ($notificationPayload['items'] ?? []);
-    $feedbackUnreadCount = (int) ($notificationPayload['unreadCount'] ?? 0);
+    $feedbackAnnouncements = [];
+    $feedbackUnreadCount = 0;
+
+    try {
+        $feedbackService = new \App\Services\FeedbackService();
+        $notificationPayload = $feedbackService->notificationPayload((int) session('user_id'));
+        $feedbackAnnouncements = (array) ($notificationPayload['items'] ?? []);
+        $feedbackUnreadCount = (int) ($notificationPayload['unreadCount'] ?? 0);
+    } catch (\Throwable $e) {
+        log_message('error', 'Kunne ikke hente feedback-varsler i layout: {message}', [
+            'message' => $e->getMessage(),
+        ]);
+    }
+
     $appLogoUrl = trim((string) ($appSettings->logo_url ?? ''));
     if ($appLogoUrl === '') {
         $appLogoUrl = 'https://www.tg.no/tg26/tg26_horizontal.svg';
@@ -786,7 +796,7 @@
     $segment = explode('/', $path)[0];
     $operationsSegments = ['shop', 'warehouse', 'categories', 'locations', 'samband', 'requests', 'transport', 'tasks'];
     $assetSegments = ['equipment', 'loans', 'vehicles'];
-    $toolsSegments = ['strekkoder', 'privat-utstyr', 'feedback', 'admin'];
+    $toolsSegments = ['strekkoder', 'privat-utstyr', 'feedback', 'admin', 'statistikk'];
     $profileLink = session('wannabe_id') !== null ? base_url('profil/' . (int) session('wannabe_id')) : base_url('profile');
     $profilePictureUrl = (! empty(session('can_show_profile_picture')) && session('wannabe_id') !== null)
         ? base_url('profile/picture/' . (int) session('wannabe_id'))
@@ -938,7 +948,10 @@
                             </li>
                             <?php endif; ?>
                             <?php if (hasRole(['developer', 'chief', 'co-chief'])): ?>
-                                <li class="menu <?= $segment === 'admin' ? 'active' : '' ?>">
+                                <li class="menu <?= $path === 'admin/statistikk' ? 'active' : '' ?>">
+                                    <a href="<?= base_url('admin/statistikk') ?>"><i class="fa-solid fa-chart-line me-2"></i><span class="nav-text">Statistikk</span></a>
+                                </li>
+                                <li class="menu <?= $path === 'admin' ? 'active' : '' ?>">
                                     <a href="<?= base_url('admin') ?>"><i class="fa-solid fa-user-shield me-2"></i><span class="nav-text">Administrasjon</span></a>
                                 </li>
                             <?php endif; ?>

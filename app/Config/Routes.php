@@ -153,6 +153,7 @@ $routes->group('', ['filter' => 'auth'], static function (RouteCollection $route
 
     $routes->group('admin', ['filter' => 'role:developer,chief,co-chief'], static function (RouteCollection $routes): void {
         $routes->get('/', 'AdminController::index');
+        $routes->get('statistikk', 'AdminController::statistics');
         $routes->post('settings', 'AdminController::updateSettings', ['filter' => 'role:developer']);
         $routes->post('crew-cache/clear', 'AdminController::clearCrewCache', ['filter' => 'role:developer']);
         $routes->post('users/create', 'AdminController::createUser');
